@@ -10,6 +10,8 @@ import './styles/app.css';
 
 // start the Stimulus application
 import './bootstrap';
+
+import $ from 'jquery';
 /**
  * Simple (ugly) code to handle the comment vote up/down
  */
