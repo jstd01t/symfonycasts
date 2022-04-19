@@ -168,6 +168,9 @@
             "config/packages/test/monolog.yaml"
         ]
     },
+    "symfony/polyfill-apcu": {
+        "version": "v1.25.0"
+    },
     "symfony/polyfill-intl-idn": {
         "version": "v1.25.0"
     },
