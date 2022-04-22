@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,32 +12,52 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class RandomSpellCommand extends Command
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        parent::__construct();
+        $this->logger = $logger;
+    }
+
     protected static $defaultName = 'app:random-spell';
-    protected static $defaultDescription = 'Add a short description for your command';
+    protected static $defaultDescription = 'Cast a random spell!';
 
     protected function configure(): void
     {
         $this
             ->setDescription(self::$defaultDescription)
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+            ->addArgument('your-name', InputArgument::OPTIONAL, 'Your name')
+            ->addOption('--yell', null, InputOption::VALUE_NONE, 'Option description')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $arg1 = $input->getArgument('arg1');
+        $yourName = $input->getArgument('your-name');
 
-        if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
+        if ($yourName) {
+            $io->note(sprintf('Hi, %s!', $yourName));
         }
 
-        if ($input->getOption('option1')) {
-            // ...
+        $spells = [
+            'alohomora',
+            'confundo',
+            'engorgio',
+            'expecto patronum',
+            'reparo',
+        ];
+
+        $spell = $spells[array_rand($spells)];
+
+        if ($input->getOption('yell')) {
+            $spell = strtoupper($spell);
         }
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $this->logger->info('Casting spell '. $spell);
+
+        $io->success($spell);
 
         return 0;
     }
