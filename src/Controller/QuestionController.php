@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Question;
 use App\Service\MarkdownHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Sentry\State\HubInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +34,32 @@ class QuestionController extends AbstractController
         //$html = $twigEnvironment->render('question/homepage.html.twig');
         //return new Response($html);
         return $this->render('question/homepage.html.twig');
+    }
+
+    /**
+     * @Route("/questions/new")
+     */
+    public function new(EntityManagerInterface $entityManager)
+    {
+        $question = new Question();
+        $question->setName('Missing pants-'.rand(0, 1000))
+            ->setSlug('missing-pants')
+            ->setQuestion(<<<EOF
+Bla, bla, bla, bla?
+EOF
+);
+        if(rand(1,10)>2){
+            $question->setAskedAt(new \DateTime(sprintf('-%d days', rand(1, 100))));
+        }
+
+        $entityManager->persist($question);
+        $entityManager->flush();
+
+        return new Response(sprintf(
+            'Well hallo! The shiny new question is id #%d, slug %s',
+            $question->getId(),
+            $question->getSlug()
+        ));
     }
 
     /**
