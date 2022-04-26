@@ -9,6 +9,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "knplabs/knp-markdown-bundle": "^1.8",
+        "knplabs/knp-time-bundle": "^1.18",
         "sensio/framework-extra-bundle": "^5.5",
         "sentry/sentry-symfony": "^3.4",
         "symfony/asset": "5.1.*",

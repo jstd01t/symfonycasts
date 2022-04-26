@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Question;
+use App\Repository\QuestionRepository;
 use App\Service\MarkdownHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -28,12 +29,12 @@ class QuestionController extends AbstractController
      * @Route("/", name="app_homepage")
      */
 
-    public function homepage(Environment $twigEnvironment)
+    public function homepage(QuestionRepository $repository)
     {
-        //fun example of using the Twig service directly
-        //$html = $twigEnvironment->render('question/homepage.html.twig');
-        //return new Response($html);
-        return $this->render('question/homepage.html.twig');
+        $questions = $repository->findAllAskedOrderedByNewest();
+        return $this->render('question/homepage.html.twig',[
+            'questions' => $questions,
+        ]);
     }
 
     /**
@@ -42,10 +43,10 @@ class QuestionController extends AbstractController
     public function new(EntityManagerInterface $entityManager)
     {
         $question = new Question();
-        $question->setName('Missing pants-'.rand(0, 1000))
-            ->setSlug('missing-pants')
+        $question->setName('Missing pants')
+            ->setSlug('missing-pants-'.rand(0, 1000))
             ->setQuestion(<<<EOF
-Bla, bla, bla, bla?
+Bla, `bla`, bla, bla?
 EOF
 );
         if(rand(1,10)>2){
@@ -65,14 +66,18 @@ EOF
     /**
      * @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper)
+    public function show($slug, MarkdownHelper $markdownHelper, EntityManagerInterface $entityManager)
     {
-
-
         if ($this->isDebug) {
             $this->logger->info('We are in debug mode!');
         }
 
+        $repository = $entityManager->getRepository(Question::class);
+        /** @var Question|null $question */
+        $question = $repository->findOneBy(['slug'=>$slug]);
+        if (!$question) {
+            throw $this->createNotFoundException(sprintf('no question found for slug "%s"', $slug));
+        }
 
         $answers = [
             'Make sure your cat is sitting `purrrfectly` still ?',
@@ -80,13 +85,11 @@ EOF
             'Maybe... try saying the spell backwards?',
         ];
 
-        $questionText = "I've been turned into a cat, any *thoughts* on how to turn back? While I'm **adorable**, I don't really care for cat food.";
-        $parsedQuestionText = $markdownHelper->parse($questionText);
+
 
 
         return $this->render('question/show.html.twig', [
-            'question' => ucwords(str_replace('-', ' ', $slug)),
-            'questionText' => $parsedQuestionText,
+            'question' => $question,
             'answers' => $answers,
         ]);
 
