@@ -26,5 +26,9 @@ EOF
         $manager->persist($question);
         $manager->flush();*/
         QuestionFactory::new()->createMany(20);
+        QuestionFactory::new()
+            ->unpublished()
+            ->createMany(5)
+        ;
     }
 }
